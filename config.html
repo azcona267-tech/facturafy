@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configuración — Facturafy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --azul: #185FA5; --azul-dark: #0C447C; --azul-light: #E6F1FB;
+  --verde: #1a7a3a; --verde-light: #EAF3DE;
+  --rojo: #A32D2D; --rojo-light: #FCEBEB;
+  --amarillo: #854F0B; --amarillo-light: #FAEEDA;
+  --gris-bg: #F4F4F1; --gris-borde: #E0DDD8;
+  --gris-texto: #5a5a6a; --texto: #1a1a2e; --blanco: #ffffff;
+  --sidebar-w: 210px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--gris-bg); color: var(--texto); font-size: 13px; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { background: var(--blanco); border-right: 1px solid var(--gris-borde); display: flex; flex-direction: column; padding: 16px 0; width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; }
+.sidebar-brand { padding: 4px 16px 20px; }
+.sidebar-brand .nombre { font-size: 16px; font-weight: 500; }
+.sidebar-brand .ruc { font-size: 11px; color: var(--gris-texto); margin-top: 2px; }
+.sidebar-section { font-size: 10px; color: var(--gris-texto); padding: 0 16px; margin: 10px 0 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gris-texto); cursor: pointer; text-decoration: none; transition: background 0.15s; font-size: 13px; }
+.sidebar-item:hover { background: var(--gris-bg); color: var(--texto); }
+.sidebar-item.active { background: var(--azul-light); color: var(--azul); font-weight: 500; }
+.sidebar-item .badge { margin-left: auto; background: var(--rojo-light); color: var(--rojo); font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--gris-borde); }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--azul-light); color: var(--azul); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { background: var(--blanco); border-bottom: 1px solid var(--gris-borde); padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-titulo { font-size: 15px; font-weight: 500; }
+.content { padding: 24px; flex: 1; }
+.btn { padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; transition: background 0.15s; }
+.btn-primary { background: var(--azul); color: white; }
+.btn-primary:hover { background: var(--azul-dark); }
+.btn-ghost { background: none; border: 1px solid var(--gris-borde); color: var(--gris-texto); }
+.btn-ghost:hover { background: var(--gris-bg); }
+.btn-danger { background: var(--rojo-light); color: var(--rojo); border: 1px solid rgba(163,45,45,0.2); }
+.btn-danger:hover { background: var(--rojo); color: white; }
+.card { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card-titulo { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.card-desc { font-size: 12px; color: var(--gris-texto); margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 500; color: var(--gris-texto); }
+.field input, .field select { padding: 8px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
+.field .hint { font-size: 10px; color: var(--gris-texto); }
+.cert-estado { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--verde-light); border: 1px solid rgba(26,122,58,0.2); border-radius: 10px; margin-bottom: 14px; }
+.cert-estado.vencido { background: var(--rojo-light); border-color: rgba(163,45,45,0.2); }
+.cert-icono { width: 36px; height: 36px; border-radius: 50%; background: var(--verde); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cert-icono.vencido { background: var(--rojo); }
+.cert-info { flex: 1; }
+.cert-nombre { font-size: 13px; font-weight: 500; }
+.cert-detalle { font-size: 11px; color: var(--gris-texto); margin-top: 2px; }
+.upload-area { border: 2px dashed var(--gris-borde); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.upload-area:hover { border-color: var(--azul); background: var(--azul-light); }
+.upload-titulo { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.upload-desc { font-size: 12px; color: var(--gris-texto); }
+.sunat-estado { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1px solid var(--gris-borde); border-radius: 10px; margin-bottom: 10px; }
+.sunat-label { font-size: 12px; color: var(--gris-texto); }
+.sunat-val { font-size: 12px; font-weight: 500; }
+.pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+.pill-ok { background: var(--verde-light); color: var(--verde); }
+.pill-err { background: var(--rojo-light); color: var(--rojo); }
+.pill-gris { background: var(--gris-bg); color: var(--gris-texto); border: 1px solid var(--gris-borde); }
+.plan-card { border: 1px solid var(--gris-borde); border-radius: 10px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.plan-card.actual { border-color: var(--azul); background: var(--azul-light); }
+.plan-nombre { font-size: 13px; font-weight: 500; }
+.plan-precio { font-size: 12px; color: var(--gris-texto); margin-top: 2px; }
+.plan-card.actual .plan-precio { color: var(--azul); }
+.alerta { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 12px; }
+.alerta.info { background: var(--azul-light); color: var(--azul); border: 1px solid rgba(24,95,165,0.2); }
+.alerta.warn { background: var(--amarillo-light); color: var(--amarillo); border: 1px solid rgba(133,79,11,0.2); }
+.dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.config-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--gris-borde); margin-bottom: 20px; }
+.config-tab { padding: 10px 20px; font-size: 13px; color: var(--gris-texto); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.config-tab.active { color: var(--azul); border-bottom-color: var(--azul); font-weight: 500; }
+.config-tab:hover:not(.active) { color: var(--texto); }
+.seccion { display: none; }
+.seccion.active { display: block; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="nombre">Facturafy</div>
+      <div class="ruc">RUC 20100070970</div>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <a href="dashboard.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section">Ventas</div>
+    <a href="cotizaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="9" y2="8"/><line x1="5" y1="11" x2="7" y2="11"/></svg>
+      Cotizaciones
+    </a>
+    <a href="factura.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+      Facturas
+    </a>
+    <a href="boleta.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/></svg>
+      Boletas
+    </a>
+    <a href="notas-salidas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M9 8H5M11 11H5"/><path d="M9 1v4h4"/></svg>
+      Notas de salida
+    </a>
+
+    <div class="sidebar-section">Comprobantes</div>
+    <a href="guia.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="10" rx="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
+      Guías de remisión
+      <span class="badge">3</span>
+    </a>
+    <a href="importar-gre.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v9M4 6l4 4 4-4"/><rect x="2" y="11" width="12" height="4" rx="1"/></svg>
+      Importar TXT GRE
+    </a>
+    <a href="notas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="8" y1="3" x2="8" y2="9"/></svg>
+      Notas crédito/débito
+    </a>
+    <a href="anulaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="5" y1="5" x2="11" y2="11"/><line x1="11" y1="5" x2="5" y2="11"/></svg>
+      Anulaciones
+    </a>
+    <a href="resumenes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="4" y1="10" x2="9" y2="10"/></svg>
+      Resúmenes diarios
+    </a>
+
+    <div class="sidebar-section">Inventario</div>
+    <a href="productos.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Productos
+    </a>
+    <a href="compras.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h2l2 8h8l1-5H4"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
+      Compras
+    </a>
+
+    <div class="sidebar-section">Empresa</div>
+    <a href="clientes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 14v-1a3 3 0 00-6 0v1"/><circle cx="8" cy="7" r="3"/></svg>
+      Clientes y proveedores
+    </a>
+    <a href="locales.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l6 5v9H2V6z"/><rect x="5" y="9" width="3" height="5"/><rect x="8" y="9" width="3" height="5"/></svg>
+      Locales y series
+    </a>
+    <a href="historial.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+      Historial
+    </a>
+
+    <div class="sidebar-section">Cuenta</div>
+    <a href="config.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+      Configuración
+    </a>
+
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar">EA</div>
+        <div>
+          <div style="font-size:12px;font-weight:500">Empresa Demo SAC</div>
+          <div style="font-size:10px;color:var(--gris-texto)">Plan Profesional</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-titulo">Configuración</div>
+      <button class="btn btn-primary" onclick="guardar()">Guardar cambios</button>
+    </div>
+
+    <div class="content">
+
+      <div class="config-tabs">
+        <div class="config-tab active" onclick="cambiarTab('empresa', this)">Empresa</div>
+        <div class="config-tab" onclick="cambiarTab('certificado', this)">Certificado digital</div>
+        <div class="config-tab" onclick="cambiarTab('sunat', this)">Credenciales SUNAT</div>
+        <div class="config-tab" onclick="cambiarTab('plan', this)">Plan y facturación</div>
+      </div>
+
+      <!-- EMPRESA -->
+      <div class="seccion active" id="sec-empresa">
+        <div class="card">
+          <div class="card-titulo">Datos de la empresa</div>
+          <div class="card-desc">Esta información aparecerá en todos tus comprobantes electrónicos.</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>RUC</label>
+              <input type="text" value="20100070970" readonly style="background:var(--gris-bg);color:var(--gris-texto)"/>
+              <span class="hint">El RUC no se puede modificar</span>
+            </div>
+            <div class="field">
+              <label>Razón social</label>
+              <input type="text" value="EMPRESA DEMO SAC"/>
+            </div>
+            <div class="field">
+              <label>Nombre comercial</label>
+              <input type="text" value="Demo" placeholder="Opcional"/>
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="text" placeholder="+51 960 000 000"/>
+            </div>
+            <div class="field full">
+              <label>Dirección fiscal</label>
+              <input type="text" value="Av. Javier Prado Este 123, San Isidro, Lima"/>
+            </div>
+            <div class="field">
+              <label>Ubigeo</label>
+              <input type="text" value="150101" maxlength="6"/>
+            </div>
+            <div class="field">
+              <label>Correo electrónico</label>
+              <input type="email" placeholder="empresa@correo.com"/>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-titulo">Logo de la empresa</div>
+          <div class="card-desc">Aparecerá en el PDF de representación impresa de tus comprobantes.</div>
+          <div class="upload-area" onclick="document.getElementById('logo-input').click()">
+            <div class="upload-titulo">Haz clic para subir tu logo</div>
+            <div class="upload-desc">PNG o JPG · Máximo 2MB · Recomendado 300x100px</div>
+            <input type="file" id="logo-input" accept="image/*" style="display:none"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERTIFICADO -->
+      <div class="seccion" id="sec-certificado">
+        <div class="card">
+          <div class="card-titulo">Certificado digital</div>
+          <div class="card-desc">SUNAT exige firmar cada comprobante con tu certificado X.509. Debe estar vigente y emitido a nombre de tu RUC.</div>
+
+          <div class="cert-estado">
+            <div class="cert-icono">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2"><path d="M9 1l2 6h6l-5 3.5 2 6L9 13l-5 3.5 2-6L1 7h6z"/></svg>
+            </div>
+            <div class="cert-info">
+              <div class="cert-nombre">Certificado vigente</div>
+              <div class="cert-detalle">RUC: 20100070970 · Vence: 20/03/2027 · Emitido por: RENIEC</div>
+            </div>
+            <span class="pill pill-ok">Vigente</span>
+          </div>
+
+          <div class="alerta info">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><circle cx="7" cy="7" r="6"/><line x1="7" y1="5" x2="7" y2="7"/><circle cx="7" cy="10" r="0.5" fill="currentColor"/></svg>
+            Para producción necesitas un certificado emitido por una CA autorizada por SUNAT: RENIEC, Andes CA, DigiCert Perú o eCertificados.
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Archivo del certificado (.pfx o .p12)</label>
+              <input type="file" accept=".pfx,.p12"/>
+              <span class="hint">El certificado debe estar emitido a nombre de tu RUC</span>
+            </div>
+            <div class="field">
+              <label>Contraseña del certificado</label>
+              <input type="password" placeholder="Contraseña del keystore"/>
+              <span class="hint">Se guarda encriptada en el servidor</span>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="probarCert()">Probar certificado</button>
+            <button class="btn btn-ghost">Ver detalles</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUNAT -->
+      <div class="seccion" id="sec-sunat">
+        <div class="card">
+          <div class="card-titulo">Estado de conexión SUNAT</div>
+          <div class="card-desc">Verifica que tus credenciales estén activas antes de emitir comprobantes.</div>
+
+          <div class="sunat-estado">
+            <span class="sunat-label">Conexión API SUNAT</span>
+            <span class="pill pill-ok">Online</span>
+          </div>
+          <div class="sunat-estado">
+            <span class="sunat-label">Ambiente</span>
+            <span class="sunat-val">Producción</span>
+          </div>
+          <div class="sunat-estado">
+            <span class="sunat-label">Último envío exitoso</span>
+            <span class="sunat-val">Hoy 15:29</span>
+          </div>
+          <div class="sunat-estado">
+            <span class="sunat-label">Token OAuth</span>
+            <span class="pill pill-ok">Vigente</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-titulo">Credenciales OAuth SUNAT</div>
+          <div class="card-desc">Obtén estas credenciales en el portal SOL de SUNAT → Empresas → API.</div>
+
+          <div class="alerta warn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><path d="M7 1L13 12H1z"/><line x1="7" y1="6" x2="7" y2="9"/><circle cx="7" cy="11" r="0.5" fill="currentColor"/></svg>
+            Nunca compartas estas credenciales. Tienen acceso a tu cuenta SUNAT.
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Client ID</label>
+              <input type="text" placeholder="Tu Client ID de SUNAT API"/>
+            </div>
+            <div class="field">
+              <label>Client Secret</label>
+              <input type="password" placeholder="Tu Client Secret"/>
+            </div>
+            <div class="field">
+              <label>Usuario SOL</label>
+              <input type="text" placeholder="Usuario secundario SOL"/>
+            </div>
+            <div class="field">
+              <label>Clave SOL</label>
+              <input type="password" placeholder="Clave SOL"/>
+            </div>
+            <div class="field">
+              <label>Ambiente</label>
+              <select>
+                <option value="beta">Beta / Homologación (pruebas)</option>
+                <option value="produccion" selected>Producción (real)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="probarSUNAT()">Probar conexión</button>
+            <button class="btn btn-ghost">Ver documentación</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAN -->
+      <div class="seccion" id="sec-plan">
+        <div class="card">
+          <div class="card-titulo">Tu plan actual</div>
+          <div class="card-desc">Facturafy · Plan Profesional</div>
+
+          <div class="plan-card actual">
+            <div>
+              <div class="plan-nombre">Plan Profesional</div>
+              <div class="plan-precio">S/ 149/mes · Comprobantes ilimitados · 1 RUC</div>
+            </div>
+            <span class="pill pill-ok">Activo</span>
+          </div>
+          <div class="plan-card">
+            <div>
+              <div class="plan-nombre">Plan Básico</div>
+              <div class="plan-precio">S/ 59/mes · Hasta 50 comprobantes · 1 RUC</div>
+            </div>
+            <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Cambiar</button>
+          </div>
+          <div class="plan-card">
+            <div>
+              <div class="plan-nombre">Plan Estudio Contable</div>
+              <div class="plan-precio">S/ 349/mes · Ilimitados · Hasta 10 RUCs</div>
+            </div>
+            <button class="btn btn-primary" style="font-size:11px;padding:5px 12px">Mejorar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-titulo">Datos de facturación</div>
+          <div class="card-desc">Para la emisión de tu factura mensual de Facturafy.</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>RUC o DNI</label>
+              <input type="text" placeholder="Para factura o boleta"/>
+            </div>
+            <div class="field">
+              <label>Correo para recibir facturas</label>
+              <input type="email" placeholder="correo@empresa.com"/>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-ghost">Historial de pagos</button>
+            <button class="btn btn-danger">Cancelar suscripción</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function cambiarTab(id, tab) {
+  document.querySelectorAll('.config-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.seccion').forEach(function(s) { s.classList.remove('active'); });
+  tab.classList.add('active');
+  document.getElementById('sec-' + id).classList.add('active');
+}
+function guardar() {
+  alert('Configuración guardada exitosamente.');
+}
+function probarCert() {
+  alert('Certificado válido.\nRUC: 20100070970\nVigente hasta: 20/03/2027');
+}
+function probarSUNAT() {
+  alert('Conexión exitosa con SUNAT.\nAmbiente: Producción\nToken obtenido correctamente.');
+}
+</script>
+  <script>
+    (function() {
+      var page = location.pathname.split('/').pop() || 'dashboard.html';
+      document.querySelectorAll('.sidebar-item').forEach(function(a) {
+        if (a.getAttribute('href') === page) a.classList.add('active');
+      });
+    })();
+  </script>
+</body>
+</html>

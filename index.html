@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facturafy — Facturación Electrónica SUNAT</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --azul: #185FA5; --azul-dark: #0C447C; --azul-light: #E6F1FB;
+  --verde: #1a7a3a; --verde-light: #EAF3DE;
+  --gris-bg: #F4F4F1; --gris-borde: #E0DDD8;
+  --gris-texto: #5a5a6a; --texto: #1a1a2e; --blanco: #ffffff;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--gris-bg); color: var(--texto); min-height: 100vh; display: flex; }
+
+/* LADO IZQUIERDO */
+.lado-izq { width: 45%; background: var(--azul); display: flex; flex-direction: column; justify-content: space-between; padding: 48px; position: relative; overflow: hidden; }
+.lado-izq::before { content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%; background: rgba(255,255,255,0.04); top: -100px; right: -100px; }
+.lado-izq::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.04); bottom: -80px; left: -80px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo { width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.brand-nombre { font-size: 20px; font-weight: 500; color: white; }
+.hero { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; }
+.hero-titulo { font-family: 'DM Serif Display', serif; font-size: 40px; color: white; line-height: 1.15; margin-bottom: 16px; }
+.hero-sub { font-size: 15px; color: rgba(255,255,255,0.65); line-height: 1.7; max-width: 340px; }
+.features { display: flex; flex-direction: column; gap: 12px; margin-top: 36px; }
+.feature { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.8); font-size: 13px; }
+.feature-dot { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.lado-izq-footer { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+/* LADO DERECHO */
+.lado-der { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px; }
+.login-box { width: 100%; max-width: 380px; }
+.login-titulo { font-size: 24px; font-weight: 500; margin-bottom: 6px; }
+.login-sub { font-size: 13px; color: var(--gris-texto); margin-bottom: 32px; }
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--gris-borde); margin-bottom: 24px; }
+.tab { padding: 10px 20px; font-size: 13px; color: var(--gris-texto); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; }
+.tab.active { color: var(--azul); border-bottom-color: var(--azul); font-weight: 500; }
+.seccion { display: none; }
+.seccion.active { display: block; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: 11px; font-weight: 500; color: var(--gris-texto); }
+.field input { padding: 10px 12px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; transition: border-color 0.15s; }
+.field input:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
+.field .hint { font-size: 10px; color: var(--gris-texto); }
+.btn-full { width: 100%; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; background: var(--azul); color: white; transition: background 0.15s; margin-top: 4px; }
+.btn-full:hover { background: var(--azul-dark); }
+.btn-full.verde { background: var(--verde); }
+.btn-full.verde:hover { background: #27500A; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.divider-line { flex: 1; height: 1px; background: var(--gris-borde); }
+.divider-text { font-size: 11px; color: var(--gris-texto); }
+.olvidaste { text-align: right; font-size: 11px; color: var(--azul); cursor: pointer; margin-top: -8px; margin-bottom: 14px; }
+.olvidaste:hover { text-decoration: underline; }
+.terminos { font-size: 11px; color: var(--gris-texto); text-align: center; margin-top: 16px; line-height: 1.6; }
+.terminos a { color: var(--azul); text-decoration: none; }
+.plan-chips { display: flex; gap: 8px; margin-bottom: 16px; }
+.chip { flex: 1; padding: 8px; border: 1px solid var(--gris-borde); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.chip.active { border-color: var(--azul); background: var(--azul-light); }
+.chip-nombre { font-size: 12px; font-weight: 500; }
+.chip-precio { font-size: 10px; color: var(--gris-texto); }
+.chip.active .chip-precio { color: var(--azul); }
+.alerta-ok { background: var(--verde-light); border: 1px solid rgba(26,122,58,0.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--verde); margin-bottom: 16px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- LADO IZQUIERDO -->
+<div class="lado-izq">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="#185FA5"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="#185FA5" opacity="0.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="#185FA5" opacity="0.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="#185FA5"/></svg>
+    </div>
+    <span class="brand-nombre">Facturafy</span>
+  </div>
+
+  <div class="hero">
+    <h1 class="hero-titulo">Factura, cobra y cumple con SUNAT</h1>
+    <p class="hero-sub">Emite facturas, boletas y guías de remisión electrónicas en segundos. Sin complicaciones, sin papel.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-dot">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5"><polyline points="1,5 4,8 9,2"/></svg>
+        </div>
+        Factura · Boleta · Guía de Remisión
+      </div>
+      <div class="feature">
+        <div class="feature-dot">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5"><polyline points="1,5 4,8 9,2"/></svg>
+        </div>
+        Envío automático a SUNAT en segundos
+      </div>
+      <div class="feature">
+        <div class="feature-dot">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5"><polyline points="1,5 4,8 9,2"/></svg>
+        </div>
+        PDF imprimible incluido siempre
+      </div>
+      <div class="feature">
+        <div class="feature-dot">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5"><polyline points="1,5 4,8 9,2"/></svg>
+        </div>
+        Desde S/ 59 al mes · Sin permanencia
+      </div>
+    </div>
+  </div>
+
+  <div class="lado-izq-footer">© 2026 Facturafy · Desarrollado por Code & Capital SAC</div>
+</div>
+
+<!-- LADO DERECHO -->
+<div class="lado-der">
+  <div class="login-box">
+    <div class="login-titulo">Bienvenido</div>
+    <div class="login-sub">Ingresa a tu cuenta o crea una nueva</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="cambiarTab('login', this)">Iniciar sesión</button>
+      <button class="tab" onclick="cambiarTab('registro', this)">Crear cuenta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="seccion active" id="sec-login">
+      <div class="alerta-ok" id="alerta-login">Cuenta creada exitosamente. Ya puedes iniciar sesión.</div>
+      <div class="field">
+        <label>RUC de la empresa</label>
+        <input type="text" placeholder="Ej: 20100070970" maxlength="11" id="ruc-login"/>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" placeholder="Tu contraseña" id="pass-login"/>
+      </div>
+      <div class="olvidaste">¿Olvidaste tu contraseña?</div>
+      <button class="btn-full" onclick="login()">Ingresar</button>
+      <div class="terminos">
+        ¿No tienes cuenta? <a onclick="cambiarTab('registro', document.querySelectorAll('.tab')[1])">Regístrate gratis</a>
+      </div>
+    </div>
+
+    <!-- REGISTRO -->
+    <div class="seccion" id="sec-registro">
+      <div class="field">
+        <label>RUC de la empresa</label>
+        <input type="text" placeholder="Ej: 20100070970" maxlength="11" id="ruc-reg" oninput="buscarRUC(this.value)"/>
+        <span class="hint">Ingresa tu RUC para autocompletar la razón social</span>
+      </div>
+      <div class="field">
+        <label>Razón social</label>
+        <input type="text" placeholder="Se autocompleta con el RUC" id="razon-reg"/>
+      </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" placeholder="correo@empresa.com"/>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" placeholder="Mínimo 8 caracteres"/>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:500;color:var(--gris-texto);margin-bottom:8px">Elige tu plan</div>
+        <div class="plan-chips">
+          <div class="chip" onclick="selPlan(this)">
+            <div class="chip-nombre">Básico</div>
+            <div class="chip-precio">S/ 59/mes</div>
+          </div>
+          <div class="chip active" onclick="selPlan(this)">
+            <div class="chip-nombre">Profesional</div>
+            <div class="chip-precio">S/ 149/mes</div>
+          </div>
+          <div class="chip" onclick="selPlan(this)">
+            <div class="chip-nombre">Contable</div>
+            <div class="chip-precio">S/ 349/mes</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-full verde" onclick="registro()">Crear cuenta gratis</button>
+      <div class="terminos">
+        Al registrarte aceptas los <a href="#">Términos de servicio</a> y la <a href="#">Política de privacidad</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function cambiarTab(id, tab) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.seccion').forEach(function(s) { s.classList.remove('active'); });
+  tab.classList.add('active');
+  document.getElementById('sec-' + id).classList.add('active');
+}
+function selPlan(chip) {
+  document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+}
+function buscarRUC(val) {
+  if (val.length === 11) {
+    document.getElementById('razon-reg').value = 'Cargando...';
+    setTimeout(function() {
+      document.getElementById('razon-reg').value = 'EMPRESA DEMO SAC';
+    }, 600);
+  }
+}
+function login() {
+  var ruc  = document.getElementById('ruc-login').value;
+  var pass = document.getElementById('pass-login').value;
+  if (!ruc || !pass) { alert('Completa todos los campos.'); return; }
+  window.location.href = 'dashboard.html';
+}
+function registro() {
+  var ruc = document.getElementById('ruc-reg').value;
+  if (!ruc || ruc.length !== 11) { alert('Ingresa un RUC válido de 11 dígitos.'); return; }
+  document.getElementById('alerta-login').style.display = 'block';
+  cambiarTab('login', document.querySelectorAll('.tab')[0]);
+}
+</script>
+</body>
+</html>
