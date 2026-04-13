@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productos — Facturafy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --azul: #185FA5; --azul-dark: #0C447C; --azul-light: #E6F1FB;
+  --verde: #1a7a3a; --verde-light: #EAF3DE;
+  --rojo: #A32D2D; --rojo-light: #FCEBEB;
+  --amarillo: #854F0B; --amarillo-light: #FAEEDA;
+  --gris-bg: #F4F4F1; --gris-borde: #E0DDD8;
+  --gris-texto: #5a5a6a; --texto: #1a1a2e; --blanco: #ffffff;
+  --sidebar-w: 210px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--gris-bg); color: var(--texto); font-size: 13px; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { background: var(--blanco); border-right: 1px solid var(--gris-borde); display: flex; flex-direction: column; padding: 16px 0; width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; }
+.sidebar-brand { padding: 4px 16px 20px; }
+.sidebar-brand .nombre { font-size: 16px; font-weight: 500; }
+.sidebar-brand .ruc { font-size: 11px; color: var(--gris-texto); margin-top: 2px; }
+.sidebar-section { font-size: 10px; color: var(--gris-texto); padding: 0 16px; margin: 10px 0 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gris-texto); cursor: pointer; text-decoration: none; transition: background 0.15s; font-size: 13px; }
+.sidebar-item:hover { background: var(--gris-bg); color: var(--texto); }
+.sidebar-item.active { background: var(--azul-light); color: var(--azul); font-weight: 500; }
+.sidebar-item .badge { margin-left: auto; background: var(--rojo-light); color: var(--rojo); font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--gris-borde); }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--azul-light); color: var(--azul); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { background: var(--blanco); border-bottom: 1px solid var(--gris-borde); padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-titulo { font-size: 15px; font-weight: 500; }
+.content { padding: 24px; flex: 1; }
+.btn { padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; transition: all 0.15s; }
+.btn-primary { background: var(--azul); color: white; }
+.btn-primary:hover { background: var(--azul-dark); }
+.btn-ghost { background: none; border: 1px solid var(--gris-borde); color: var(--gris-texto); }
+.btn-ghost:hover { background: var(--gris-bg); }
+.pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+.pill-activo { background: var(--verde-light); color: var(--verde); }
+.pill-inactivo { background: var(--gris-bg); color: var(--gris-texto); border: 1px solid var(--gris-borde); }
+.pill-bajo { background: var(--rojo-light); color: var(--rojo); }
+.filtros { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+.search-wrap { position: relative; flex: 1; max-width: 320px; }
+.search-wrap input { width: 100%; padding: 8px 10px 8px 32px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); }
+.search-wrap input:focus { outline: none; border-color: var(--azul); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gris-texto); pointer-events: none; }
+.tabla-wrap { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th { font-size: 11px; font-weight: 500; color: var(--gris-texto); text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--gris-borde); background: var(--gris-bg); }
+td { font-size: 12px; padding: 11px 16px; border-bottom: 1px solid var(--gris-borde); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gris-bg); }
+.accion { font-size: 11px; color: var(--azul); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; margin-right: 8px; }
+.accion:hover { text-decoration: underline; }
+.accion.danger { color: var(--rojo); margin-right: 0; }
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 10px; padding: 14px; }
+.stat-val { font-size: 24px; font-weight: 500; }
+.stat-lbl { font-size: 11px; color: var(--gris-texto); margin-top: 3px; }
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 24px; }
+.modal-box { background: var(--blanco); border-radius: 14px; width: 100%; max-width: 580px; overflow: hidden; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--gris-borde); display: flex; justify-content: space-between; align-items: center; }
+.modal-titulo { font-size: 14px; font-weight: 500; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gris-texto); }
+.modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--gris-borde); display: flex; justify-content: flex-end; gap: 8px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 500; color: var(--gris-texto); }
+.field input, .field select, .field textarea { padding: 8px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
+.field .hint { font-size: 10px; color: var(--gris-texto); }
+.seccion-titulo { font-size: 11px; font-weight: 500; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gris-borde); grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="nombre">Facturafy</div>
+      <div class="ruc">RUC 20100070970</div>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <a href="dashboard.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section">Ventas</div>
+    <a href="cotizaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="9" y2="8"/><line x1="5" y1="11" x2="7" y2="11"/></svg>
+      Cotizaciones
+    </a>
+    <a href="factura.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+      Facturas
+    </a>
+    <a href="boleta.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/></svg>
+      Boletas
+    </a>
+    <a href="notas-salidas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M9 8H5M11 11H5"/><path d="M9 1v4h4"/></svg>
+      Notas de salida
+    </a>
+
+    <div class="sidebar-section">Comprobantes</div>
+    <a href="guia.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="10" rx="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
+      Guías de remisión
+      <span class="badge">3</span>
+    </a>
+    <a href="importar-gre.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v9M4 6l4 4 4-4"/><rect x="2" y="11" width="12" height="4" rx="1"/></svg>
+      Importar TXT GRE
+    </a>
+    <a href="notas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="8" y1="3" x2="8" y2="9"/></svg>
+      Notas crédito/débito
+    </a>
+    <a href="anulaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="5" y1="5" x2="11" y2="11"/><line x1="11" y1="5" x2="5" y2="11"/></svg>
+      Anulaciones
+    </a>
+    <a href="resumenes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="4" y1="10" x2="9" y2="10"/></svg>
+      Resúmenes diarios
+    </a>
+
+    <div class="sidebar-section">Inventario</div>
+    <a href="productos.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Productos
+    </a>
+    <a href="compras.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h2l2 8h8l1-5H4"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
+      Compras
+    </a>
+
+    <div class="sidebar-section">Empresa</div>
+    <a href="clientes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 14v-1a3 3 0 00-6 0v1"/><circle cx="8" cy="7" r="3"/></svg>
+      Clientes y proveedores
+    </a>
+    <a href="locales.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l6 5v9H2V6z"/><rect x="5" y="9" width="3" height="5"/><rect x="8" y="9" width="3" height="5"/></svg>
+      Locales y series
+    </a>
+    <a href="historial.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+      Historial
+    </a>
+
+    <div class="sidebar-section">Cuenta</div>
+    <a href="config.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+      Configuración
+    </a>
+
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar">EA</div>
+        <div>
+          <div style="font-size:12px;font-weight:500">Empresa Demo SAC</div>
+          <div style="font-size:10px;color:var(--gris-texto)">Plan Profesional</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-titulo">Productos</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="alert('Importando desde Excel...')">Importar Excel</button>
+        <button class="btn btn-ghost" onclick="alert('Exportando catálogo...')">Exportar</button>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo producto</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val">38</div>
+          <div class="stat-lbl">Total productos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--verde)">35</div>
+          <div class="stat-lbl">Activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--rojo)">3</div>
+          <div class="stat-lbl">Stock bajo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--gris-texto)">3</div>
+          <div class="stat-lbl">Inactivos</div>
+        </div>
+      </div>
+
+      <div class="filtros">
+        <div class="search-wrap">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><line x1="10" y1="10" x2="13" y2="13"/></svg>
+          <input type="text" placeholder="Buscar por nombre o código..." oninput="buscar(this.value)"/>
+        </div>
+        <select style="padding:8px 10px;border:1px solid var(--gris-borde);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--texto);background:var(--blanco)" onchange="filtrarCategoria(this.value)">
+          <option value="">Todas las categorías</option>
+          <option value="Tecnología">Tecnología</option>
+          <option value="Accesorios">Accesorios</option>
+          <option value="Servicios">Servicios</option>
+        </select>
+        <select style="padding:8px 10px;border:1px solid var(--gris-borde);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--texto);background:var(--blanco)" onchange="filtrarEstado(this.value)">
+          <option value="">Todos los estados</option>
+          <option value="activo">Activos</option>
+          <option value="inactivo">Inactivos</option>
+        </select>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px">Código</th>
+              <th>Nombre del producto</th>
+              <th style="width:100px">Categoría</th>
+              <th style="width:80px">Unidad</th>
+              <th style="width:90px">Precio (S/)</th>
+              <th style="width:80px">Stock</th>
+              <th style="width:80px">Estado</th>
+              <th style="width:100px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <tr data-categoria="Tecnología" data-estado="activo">
+              <td style="font-family:monospace;font-size:11px">PROD-001</td>
+              <td style="font-weight:500">Laptop Core i7 16GB 512GB SSD</td>
+              <td style="color:var(--gris-texto)">Tecnología</td>
+              <td style="color:var(--gris-texto)">NIU</td>
+              <td style="font-weight:500">2,500.00</td>
+              <td>12</td>
+              <td><span class="pill pill-activo">Activo</span></td>
+              <td><button class="accion" onclick="editarProducto(this)">Editar</button><button class="accion danger" onclick="eliminar(this)">Eliminar</button></td>
+            </tr>
+            <tr data-categoria="Accesorios" data-estado="activo">
+              <td style="font-family:monospace;font-size:11px">PROD-002</td>
+              <td style="font-weight:500">Mouse inalámbrico Logitech</td>
+              <td style="color:var(--gris-texto)">Accesorios</td>
+              <td style="color:var(--gris-texto)">NIU</td>
+              <td style="font-weight:500">120.00</td>
+              <td style="color:var(--rojo);font-weight:500">2</td>
+              <td><span class="pill pill-bajo">Stock bajo</span></td>
+              <td><button class="accion" onclick="editarProducto(this)">Editar</button><button class="accion danger" onclick="eliminar(this)">Eliminar</button></td>
+            </tr>
+            <tr data-categoria="Tecnología" data-estado="activo">
+              <td style="font-family:monospace;font-size:11px">PROD-003</td>
+              <td style="font-weight:500">Monitor 27" Full HD LG</td>
+              <td style="color:var(--gris-texto)">Tecnología</td>
+              <td style="color:var(--gris-texto)">NIU</td>
+              <td style="font-weight:500">850.00</td>
+              <td>8</td>
+              <td><span class="pill pill-activo">Activo</span></td>
+              <td><button class="accion" onclick="editarProducto(this)">Editar</button><button class="accion danger" onclick="eliminar(this)">Eliminar</button></td>
+            </tr>
+            <tr data-categoria="Servicios" data-estado="activo">
+              <td style="font-family:monospace;font-size:11px">SERV-001</td>
+              <td style="font-weight:500">Mantenimiento de equipos</td>
+              <td style="color:var(--gris-texto)">Servicios</td>
+              <td style="color:var(--gris-texto)">ZZ</td>
+              <td style="font-weight:500">180.00</td>
+              <td style="color:var(--gris-texto)">—</td>
+              <td><span class="pill pill-activo">Activo</span></td>
+              <td><button class="accion" onclick="editarProducto(this)">Editar</button><button class="accion danger" onclick="eliminar(this)">Eliminar</button></td>
+            </tr>
+            <tr data-categoria="Accesorios" data-estado="inactivo">
+              <td style="font-family:monospace;font-size:11px">PROD-004</td>
+              <td style="font-weight:500;color:var(--gris-texto)">Teclado mecánico RGB</td>
+              <td style="color:var(--gris-texto)">Accesorios</td>
+              <td style="color:var(--gris-texto)">NIU</td>
+              <td style="color:var(--gris-texto)">350.00</td>
+              <td style="color:var(--gris-texto)">0</td>
+              <td><span class="pill pill-inactivo">Inactivo</span></td>
+              <td><button class="accion" onclick="editarProducto(this)">Editar</button><button class="accion danger" onclick="eliminar(this)">Eliminar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-titulo" id="modal-titulo">Nuevo producto</div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="seccion-titulo">Información general</div>
+        <div class="field">
+          <label>Código interno</label>
+          <input type="text" id="f-codigo" placeholder="Ej: PROD-001"/>
+          <span class="hint">Código único de tu empresa</span>
+        </div>
+        <div class="field">
+          <label>Código SUNAT</label>
+          <input type="text" id="f-codigo-sunat" placeholder="Opcional"/>
+          <span class="hint">Código de producto SUNAT / GS1</span>
+        </div>
+        <div class="field full">
+          <label>Nombre del producto o servicio</label>
+          <input type="text" id="f-nombre" placeholder="Descripción que aparecerá en el comprobante"/>
+        </div>
+        <div class="field">
+          <label>Categoría</label>
+          <select id="f-categoria">
+            <option>Tecnología</option>
+            <option>Accesorios</option>
+            <option>Servicios</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Unidad de medida (SUNAT)</label>
+          <select id="f-unidad">
+            <option value="NIU">NIU — Unidades</option>
+            <option value="KGM">KGM — Kilogramos</option>
+            <option value="MTR">MTR — Metros</option>
+            <option value="LTR">LTR — Litros</option>
+            <option value="ZZ">ZZ — Servicios</option>
+          </select>
+        </div>
+        <div class="seccion-titulo">Precios</div>
+        <div class="field">
+          <label>Precio de venta (con IGV)</label>
+          <input type="number" id="f-precio" placeholder="0.00" step="0.01" oninput="calcPrecio()"/>
+        </div>
+        <div class="field">
+          <label>Precio sin IGV</label>
+          <input type="number" id="f-precio-sin-igv" placeholder="0.00" step="0.01" readonly style="background:var(--gris-bg);color:var(--gris-texto)"/>
+        </div>
+        <div class="field">
+          <label>Afectación IGV</label>
+          <select id="f-igv">
+            <option value="10">10 — Gravado (18%)</option>
+            <option value="20">20 — Exonerado</option>
+            <option value="30">30 — Inafecto</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Precio de compra</label>
+          <input type="number" id="f-precio-compra" placeholder="0.00" step="0.01"/>
+        </div>
+        <div class="seccion-titulo">Stock</div>
+        <div class="field">
+          <label>Stock actual</label>
+          <input type="number" id="f-stock" placeholder="0"/>
+        </div>
+        <div class="field">
+          <label>Stock mínimo (alerta)</label>
+          <input type="number" id="f-stock-min" placeholder="5"/>
+        </div>
+        <div class="field">
+          <label>Peso (KG)</label>
+          <input type="number" id="f-peso" placeholder="0.00" step="0.01"/>
+          <span class="hint">Para calcular peso en guías de remisión</span>
+        </div>
+        <div class="field">
+          <label>Estado</label>
+          <select id="f-estado">
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardar()">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModal() {
+  document.getElementById('modal-titulo').textContent = 'Nuevo producto';
+  document.getElementById('f-codigo').value = '';
+  document.getElementById('f-nombre').value = '';
+  document.getElementById('f-precio').value = '';
+  document.getElementById('f-precio-sin-igv').value = '';
+  document.getElementById('f-stock').value = '';
+  var m = document.getElementById('modal');
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+function calcPrecio() {
+  var precio = parseFloat(document.getElementById('f-precio').value) || 0;
+  var sinIgv = precio / 1.18;
+  document.getElementById('f-precio-sin-igv').value = sinIgv.toFixed(2);
+}
+function guardar() {
+  var nombre = document.getElementById('f-nombre').value;
+  if (!nombre) { alert('Ingresa el nombre del producto.'); return; }
+  alert('Producto guardado exitosamente.');
+  cerrarModal();
+}
+function editarProducto(btn) {
+  var row = btn.closest('tr');
+  var celdas = row.querySelectorAll('td');
+  document.getElementById('modal-titulo').textContent = 'Editar producto';
+  document.getElementById('f-codigo').value = celdas[0].textContent.trim();
+  document.getElementById('f-nombre').value = celdas[1].textContent.trim();
+  document.getElementById('f-precio').value = celdas[4].textContent.replace(',','').trim();
+  document.getElementById('f-stock').value  = celdas[5].textContent.trim();
+  var m = document.getElementById('modal');
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function eliminar(btn) {
+  if (confirm('¿Eliminar este producto?')) btn.closest('tr').remove();
+}
+function buscar(val) {
+  val = val.toLowerCase();
+  document.querySelectorAll('#tabla-body tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
+}
+function filtrarCategoria(val) {
+  document.querySelectorAll('#tabla-body tr').forEach(function(row) {
+    row.style.display = (!val || row.dataset.categoria === val) ? '' : 'none';
+  });
+}
+function filtrarEstado(val) {
+  document.querySelectorAll('#tabla-body tr').forEach(function(row) {
+    row.style.display = (!val || row.dataset.estado === val) ? '' : 'none';
+  });
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') cerrarModal();
+});
+</script>
+  <script>
+    (function() {
+      var page = location.pathname.split('/').pop() || 'dashboard.html';
+      document.querySelectorAll('.sidebar-item').forEach(function(a) {
+        if (a.getAttribute('href') === page) a.classList.add('active');
+      });
+    })();
+  </script>
+</body>
+</html>

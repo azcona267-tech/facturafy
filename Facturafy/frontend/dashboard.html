@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Facturafy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --azul: #185FA5; --azul-dark: #0C447C; --azul-light: #E6F1FB;
+  --verde: #1a7a3a; --verde-light: #EAF3DE;
+  --rojo: #A32D2D; --rojo-light: #FCEBEB;
+  --amarillo: #854F0B; --amarillo-light: #FAEEDA;
+  --gris-bg: #F4F4F1; --gris-borde: #E0DDD8;
+  --gris-texto: #5a5a6a; --texto: #1a1a2e; --blanco: #ffffff;
+  --sidebar-w: 210px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--gris-bg); color: var(--texto); font-size: 13px; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { background: var(--blanco); border-right: 1px solid var(--gris-borde); display: flex; flex-direction: column; padding: 16px 0; width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; }
+.sidebar-brand { padding: 4px 16px 20px; }
+.sidebar-brand .nombre { font-size: 16px; font-weight: 500; }
+.sidebar-brand .ruc { font-size: 11px; color: var(--gris-texto); margin-top: 2px; }
+.sidebar-section { font-size: 10px; color: var(--gris-texto); padding: 0 16px; margin: 10px 0 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gris-texto); cursor: pointer; text-decoration: none; transition: background 0.15s; font-size: 13px; }
+.sidebar-item:hover { background: var(--gris-bg); color: var(--texto); }
+.sidebar-item.active { background: var(--azul-light); color: var(--azul); font-weight: 500; }
+.sidebar-item .badge { margin-left: auto; background: var(--rojo-light); color: var(--rojo); font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--gris-borde); }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--azul-light); color: var(--azul); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { background: var(--blanco); border-bottom: 1px solid var(--gris-borde); padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-titulo { font-size: 15px; font-weight: 500; }
+.content { padding: 24px; flex: 1; }
+.btn { padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; }
+.btn-primary { background: var(--azul); color: white; }
+.btn-ghost { background: none; border: 1px solid var(--gris-borde); color: var(--gris-texto); }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.metric { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 10px; padding: 16px; }
+.metric-label { font-size: 11px; color: var(--gris-texto); margin-bottom: 8px; }
+.metric-val { font-size: 28px; font-weight: 500; line-height: 1; }
+.metric-sub { font-size: 11px; color: var(--gris-texto); margin-top: 6px; }
+.metric-sub.up { color: var(--verde); }
+.metric-sub.down { color: var(--rojo); }
+.card { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card-titulo { font-size: 13px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.tabla-wrap { overflow-x: auto; border: 1px solid var(--gris-borde); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th { font-size: 11px; font-weight: 500; color: var(--gris-texto); text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--gris-borde); background: var(--gris-bg); }
+td { font-size: 12px; padding: 11px 16px; border-bottom: 1px solid var(--gris-borde); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gris-bg); }
+.pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+.pill-ok { background: var(--verde-light); color: var(--verde); }
+.pill-err { background: var(--rojo-light); color: var(--rojo); }
+.pill-pend { background: var(--amarillo-light); color: var(--amarillo); }
+.pill-gris { background: var(--gris-bg); color: var(--gris-texto); border: 1px solid var(--gris-borde); }
+.dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.accion-btn { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--gris-borde); border-radius: 8px; text-decoration: none; color: var(--texto); margin-bottom: 8px; transition: background 0.15s; }
+.accion-btn:hover { background: var(--gris-bg); }
+.accion-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.estado-fila { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--gris-borde); }
+.estado-fila:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="nombre">Facturafy</div>
+      <div class="ruc">RUC 20100070970</div>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <a href="dashboard.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section">Ventas</div>
+    <a href="cotizaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="9" y2="8"/><line x1="5" y1="11" x2="7" y2="11"/></svg>
+      Cotizaciones
+    </a>
+    <a href="factura.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+      Facturas
+    </a>
+    <a href="boleta.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/></svg>
+      Boletas
+    </a>
+    <a href="notas-salidas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M9 8H5M11 11H5"/><path d="M9 1v4h4"/></svg>
+      Notas de salida
+    </a>
+
+    <div class="sidebar-section">Comprobantes</div>
+    <a href="guia.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="10" rx="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
+      Guías de remisión
+      <span class="badge">3</span>
+    </a>
+    <a href="importar-gre.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v9M4 6l4 4 4-4"/><rect x="2" y="11" width="12" height="4" rx="1"/></svg>
+      Importar TXT GRE
+    </a>
+    <a href="notas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="8" y1="3" x2="8" y2="9"/></svg>
+      Notas crédito/débito
+    </a>
+    <a href="anulaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="5" y1="5" x2="11" y2="11"/><line x1="11" y1="5" x2="5" y2="11"/></svg>
+      Anulaciones
+    </a>
+    <a href="resumenes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="4" y1="10" x2="9" y2="10"/></svg>
+      Resúmenes diarios
+    </a>
+
+    <div class="sidebar-section">Inventario</div>
+    <a href="productos.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Productos
+    </a>
+    <a href="compras.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h2l2 8h8l1-5H4"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
+      Compras
+    </a>
+
+    <div class="sidebar-section">Empresa</div>
+    <a href="clientes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 14v-1a3 3 0 00-6 0v1"/><circle cx="8" cy="7" r="3"/></svg>
+      Clientes y proveedores
+    </a>
+    <a href="locales.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l6 5v9H2V6z"/><rect x="5" y="9" width="3" height="5"/><rect x="8" y="9" width="3" height="5"/></svg>
+      Locales y series
+    </a>
+    <a href="historial.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+      Historial
+    </a>
+
+    <div class="sidebar-section">Cuenta</div>
+    <a href="config.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+      Configuración
+    </a>
+
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar">EA</div>
+        <div>
+          <div style="font-size:12px;font-weight:500">Empresa Demo SAC</div>
+          <div style="font-size:10px;color:var(--gris-texto)">Plan Profesional</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-titulo">Dashboard</div>
+      <div style="display:flex;gap:8px">
+        <a href="factura.html" class="btn btn-ghost">+ Nuevo comprobante</a>
+        <a href="guia.html" class="btn btn-primary">+ Nueva guía</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Emitidos este mes</div>
+          <div class="metric-val">47</div>
+          <div class="metric-sub up">+12 vs mes anterior</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Aceptados SUNAT</div>
+          <div class="metric-val">44</div>
+          <div class="metric-sub up">93.6% tasa de éxito</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Rechazados</div>
+          <div class="metric-val">3</div>
+          <div class="metric-sub down">Requieren atención</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Pendientes</div>
+          <div class="metric-val">2</div>
+          <div class="metric-sub">En cola</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">
+          Últimos comprobantes
+          <a href="historial.html" style="margin-left:auto;font-size:11px;color:var(--azul);text-decoration:none;font-weight:400">Ver todos →</a>
+        </div>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+                <tr>
+                    <th style="width:140px">N° Documento</th>
+                    <th style="width:70px">Tipo</th>
+                    <th>Destinatario</th>
+                    <th style="width:100px">Fecha</th>
+                    <th style="width:90px">Estado</th>
+                    <th style="width:90px">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">T001-00000047</td>
+                <td><span class="pill pill-gris">Guía</span></td>
+                <td style="color:var(--gris-texto)">Cliente Demo EIRL</td>
+                <td style="color:var(--gris-texto)">20/03/2026</td>
+                <td><span class="pill pill-ok">Aceptado</span></td>
+                <td><div style="display:flex;gap:8px;align-items:center">
+                    <a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">PDF</a>
+                    <a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">XML</a>
+                    </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">F001-00000089</td>
+                <td><span class="pill pill-gris">Factura</span></td>
+                <td style="color:var(--gris-texto)">Distribuidora Norte SAC</td>
+                <td style="color:var(--gris-texto)">20/03/2026</td>
+                <td><span class="pill pill-ok">Aceptado</span></td>
+                <td><div style="display:flex;gap:8px;align-items:center">
+                    <a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">PDF</a>
+                    <a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">XML</a>
+                    </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">B001-00000034</td>
+                <td><span class="pill pill-gris">Boleta</span></td>
+                <td style="color:var(--gris-texto)">Cliente Final</td>
+                <td style="color:var(--gris-texto)">19/03/2026</td>
+                <td><span class="pill pill-err">Rechazado</span></td>
+                <td><a href="#" style="font-size:11px;color:var(--rojo);text-decoration:none">Reintentar</a></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">T001-00000046</td>
+                <td><span class="pill pill-gris">Guía</span></td>
+                <td style="color:var(--gris-texto)">Ferretería Central</td>
+                <td style="color:var(--gris-texto)">19/03/2026</td>
+                <td><span class="pill pill-pend">Pendiente</span></td>
+                <td><a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">Enviar</a></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">F001-00000088</td>
+                <td><span class="pill pill-gris">Factura</span></td>
+                <td style="color:var(--gris-texto)">Importadora Lima SAC</td>
+                <td style="color:var(--gris-texto)">18/03/2026</td>
+                <td><span class="pill pill-ok">Aceptado</span></td>
+                <td><div style="display:flex;gap:8px;align-items:center">
+                    <a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">PDF</a>
+                    <a href="#" style="font-size:11px;color:var(--azul);text-decoration:none">XML</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dos-col">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-titulo">Acciones rápidas</div>
+          <a href="factura.html" class="accion-btn">
+            <div class="accion-icon" style="background:var(--azul-light)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--azul)" stroke-width="1.5"><rect x="1" y="1" width="12" height="12" rx="1.5"/><line x1="4" y1="5" x2="10" y2="5"/><line x1="4" y1="8" x2="8" y2="8"/></svg>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Nueva factura</div>
+              <div style="font-size:10px;color:var(--gris-texto)">Emitir factura electrónica</div>
+            </div>
+          </a>
+          <a href="boleta.html" class="accion-btn">
+            <div class="accion-icon" style="background:var(--verde-light)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--verde)" stroke-width="1.5"><rect x="1" y="1" width="12" height="12" rx="1.5"/><line x1="4" y1="5" x2="10" y2="5"/></svg>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Nueva boleta</div>
+              <div style="font-size:10px;color:var(--gris-texto)">Emitir boleta electrónica</div>
+            </div>
+          </a>
+          <a href="guia.html" class="accion-btn" style="margin-bottom:0">
+            <div class="accion-icon" style="background:var(--amarillo-light)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--amarillo)" stroke-width="1.5"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="4" cy="11" r="1"/><circle cx="10" cy="11" r="1"/></svg>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Nueva guía</div>
+              <div style="font-size:10px;color:var(--gris-texto)">Guía de remisión electrónica</div>
+            </div>
+          </a>
+        </div>
+
+        <div class="card" style="margin-bottom:0">
+          <div class="card-titulo">Estado del sistema</div>
+          <div class="estado-fila"><span style="color:var(--gris-texto);font-size:12px">Certificado digital</span><span class="pill pill-ok">Vigente</span></div>
+          <div class="estado-fila"><span style="color:var(--gris-texto);font-size:12px">Vence</span><span style="font-size:12px;font-weight:500">20/03/2027</span></div>
+          <div class="estado-fila"><span style="color:var(--gris-texto);font-size:12px">Conexión SUNAT</span><span class="pill pill-ok">Online</span></div>
+          <div class="estado-fila"><span style="color:var(--gris-texto);font-size:12px">Ambiente</span><span style="font-size:12px;font-weight:500">Producción</span></div>
+          <div class="estado-fila"><span style="color:var(--gris-texto);font-size:12px">Plan actual</span><span style="font-size:12px;font-weight:500">Profesional</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+  <script>
+    (function() {
+      var page = location.pathname.split('/').pop() || 'dashboard.html';
+      document.querySelectorAll('.sidebar-item').forEach(function(a) {
+        if (a.getAttribute('href') === page) a.classList.add('active');
+      });
+    })();
+  </script>
+</body>
+</html>

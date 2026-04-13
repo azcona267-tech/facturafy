@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nueva Guía de Remisión — Facturafy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --azul: #185FA5; --azul-dark: #0C447C; --azul-light: #E6F1FB;
+  --verde: #1a7a3a; --verde-light: #EAF3DE;
+  --rojo: #A32D2D; --rojo-light: #FCEBEB;
+  --amarillo: #854F0B; --amarillo-light: #FAEEDA;
+  --gris-bg: #F4F4F1; --gris-borde: #E0DDD8;
+  --gris-texto: #5a5a6a; --texto: #1a1a2e; --blanco: #ffffff;
+  --sidebar-w: 210px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--gris-bg); color: var(--texto); font-size: 13px; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { background: var(--blanco); border-right: 1px solid var(--gris-borde); display: flex; flex-direction: column; padding: 16px 0; width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; }
+.sidebar-brand { padding: 4px 16px 20px; }
+.sidebar-brand .nombre { font-size: 16px; font-weight: 500; }
+.sidebar-brand .ruc { font-size: 11px; color: var(--gris-texto); margin-top: 2px; }
+.sidebar-section { font-size: 10px; color: var(--gris-texto); padding: 0 16px; margin: 10px 0 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gris-texto); cursor: pointer; text-decoration: none; transition: background 0.15s; font-size: 13px; }
+.sidebar-item:hover { background: var(--gris-bg); color: var(--texto); }
+.sidebar-item.active { background: var(--amarillo-light); color: var(--amarillo); font-weight: 500; }
+.sidebar-item .badge { margin-left: auto; background: var(--rojo-light); color: var(--rojo); font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--gris-borde); }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--azul-light); color: var(--azul); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { background: var(--blanco); border-bottom: 1px solid var(--gris-borde); padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-left { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.back { color: var(--gris-texto); text-decoration: none; }
+.back:hover { color: var(--texto); }
+.sep { color: var(--gris-borde); }
+.topbar-titulo { font-size: 15px; font-weight: 500; }
+.content { padding: 24px; flex: 1; padding-bottom: 80px; }
+.btn { padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; transition: background 0.15s; }
+.btn-primary { background: var(--amarillo); color: white; }
+.btn-primary:hover { background: #633806; }
+.btn-ghost { background: none; border: 1px solid var(--gris-borde); color: var(--gris-texto); }
+.btn-ghost:hover { background: var(--gris-bg); }
+.card { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card-titulo { font-size: 13px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.tag { font-size: 10px; background: var(--gris-bg); color: var(--gris-texto); padding: 2px 8px; border-radius: 20px; font-weight: 400; border: 1px solid var(--gris-borde); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 500; color: var(--gris-texto); }
+.field input, .field select { padding: 8px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--amarillo); box-shadow: 0 0 0 3px rgba(133,79,11,0.1); }
+.field .hint { font-size: 10px; color: var(--gris-texto); }
+.ruta-grid { display: grid; grid-template-columns: 1fr 48px 1fr; gap: 0; align-items: center; }
+.ruta-arrow { display: flex; align-items: center; justify-content: center; color: var(--gris-borde); font-size: 20px; padding-top: 20px; }
+.ruta-box { background: var(--gris-bg); border: 1px solid var(--gris-borde); border-radius: 10px; padding: 14px; }
+.ruta-box.partida { border-color: var(--azul-light); background: var(--azul-light); }
+.ruta-box.llegada { border-color: var(--verde-light); background: var(--verde-light); }
+.ruta-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.ruta-box.partida .ruta-label { color: var(--azul); }
+.ruta-box.llegada .ruta-label { color: var(--verde); }
+.ruta-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.ruta-field:last-child { margin-bottom: 0; }
+.ruta-field label { font-size: 10px; font-weight: 500; color: var(--gris-texto); }
+.ruta-field input { padding: 7px 8px; border: 1px solid var(--gris-borde); border-radius: 7px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.ruta-field input:focus { outline: none; border-color: var(--azul); }
+.items-header { display: grid; grid-template-columns: 2fr 80px 100px 100px 36px; gap: 8px; padding: 0 0 8px; border-bottom: 1px solid var(--gris-borde); margin-bottom: 10px; }
+.items-header span { font-size: 10px; font-weight: 500; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.05em; }
+.item-row { display: grid; grid-template-columns: 2fr 80px 100px 100px 36px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.item-row input { padding: 7px 8px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.item-row input:focus { outline: none; border-color: var(--amarillo); }
+.del-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--gris-borde); background: none; color: var(--gris-texto); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.del-btn:hover { background: var(--rojo-light); color: var(--rojo); border-color: transparent; }
+.add-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--amarillo); background: none; border: none; cursor: pointer; padding: 6px 0; font-family: 'DM Sans', sans-serif; margin-top: 4px; }
+.bottom-bar { background: var(--blanco); border-top: 1px solid var(--gris-borde); padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; z-index: 10; }
+.bottom-info { font-size: 11px; color: var(--gris-texto); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="nombre">Facturafy</div>
+      <div class="ruc">RUC 20100070970</div>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <a href="dashboard.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section">Ventas</div>
+    <a href="cotizaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="9" y2="8"/><line x1="5" y1="11" x2="7" y2="11"/></svg>
+      Cotizaciones
+    </a>
+    <a href="factura.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+      Facturas
+    </a>
+    <a href="boleta.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/></svg>
+      Boletas
+    </a>
+    <a href="notas-salidas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M9 8H5M11 11H5"/><path d="M9 1v4h4"/></svg>
+      Notas de salida
+    </a>
+
+    <div class="sidebar-section">Comprobantes</div>
+    <a href="guia.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="10" rx="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
+      Guías de remisión
+      <span class="badge">3</span>
+    </a>
+    <a href="importar-gre.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v9M4 6l4 4 4-4"/><rect x="2" y="11" width="12" height="4" rx="1"/></svg>
+      Importar TXT GRE
+    </a>
+    <a href="notas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="8" y1="3" x2="8" y2="9"/></svg>
+      Notas crédito/débito
+    </a>
+    <a href="anulaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="5" y1="5" x2="11" y2="11"/><line x1="11" y1="5" x2="5" y2="11"/></svg>
+      Anulaciones
+    </a>
+    <a href="resumenes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="4" y1="10" x2="9" y2="10"/></svg>
+      Resúmenes diarios
+    </a>
+
+    <div class="sidebar-section">Inventario</div>
+    <a href="productos.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Productos
+    </a>
+    <a href="compras.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h2l2 8h8l1-5H4"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
+      Compras
+    </a>
+
+    <div class="sidebar-section">Empresa</div>
+    <a href="clientes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 14v-1a3 3 0 00-6 0v1"/><circle cx="8" cy="7" r="3"/></svg>
+      Clientes y proveedores
+    </a>
+    <a href="locales.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l6 5v9H2V6z"/><rect x="5" y="9" width="3" height="5"/><rect x="8" y="9" width="3" height="5"/></svg>
+      Locales y series
+    </a>
+    <a href="historial.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+      Historial
+    </a>
+
+    <div class="sidebar-section">Cuenta</div>
+    <a href="config.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+      Configuración
+    </a>
+
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar">EA</div>
+        <div>
+          <div style="font-size:12px;font-weight:500">Empresa Demo SAC</div>
+          <div style="font-size:10px;color:var(--gris-texto)">Plan Profesional</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <a href="dashboard.html" class="back">← Guías</a>
+        <span class="sep">/</span>
+        <span class="topbar-titulo">Nueva guía de remisión</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost">Guardar borrador</button>
+        <button class="btn btn-primary" onclick="emitir()">Emitir a SUNAT →</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+        <div class="card-titulo">
+          Datos del traslado
+          <span class="tag">GRE Remitente · Serie T001</span>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Fecha de emisión</label>
+            <input type="date" value="2026-03-20"/>
+          </div>
+          <div class="field">
+            <label>Fecha inicio de traslado</label>
+            <input type="date" value="2026-03-20"/>
+          </div>
+          <div class="field">
+            <label>Motivo de traslado</label>
+            <select>
+              <option value="01">01 — Venta</option>
+              <option value="02">02 — Compra</option>
+              <option value="04">04 — Traslado entre establecimientos</option>
+              <option value="08">08 — Importación</option>
+              <option value="09">09 — Exportación</option>
+              <option value="13">13 — Otros</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Modalidad de traslado</label>
+            <select id="modalidad" onchange="toggleTransportista()">
+              <option value="02">02 — Transporte privado</option>
+              <option value="01">01 — Transporte público</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Peso bruto total (KG)</label>
+            <input type="number" placeholder="Ej: 150.00" step="0.01"/>
+          </div>
+          <div class="field">
+            <label>Número de bultos</label>
+            <input type="number" placeholder="Ej: 5"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">Destinatario</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Tipo de documento</label>
+            <select>
+              <option>6 — RUC</option>
+              <option>1 — DNI</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Número de documento</label>
+            <input type="text" placeholder="Ej: 20131312955"/>
+          </div>
+          <div class="field full">
+            <label>Razón social / Nombre</label>
+            <input type="text" placeholder="Nombre o razón social del destinatario"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">Ruta de traslado</div>
+        <div class="ruta-grid">
+          <div class="ruta-box partida">
+            <div class="ruta-label">Punto de partida</div>
+            <div class="ruta-field">
+              <label>Ubigeo (6 dígitos)</label>
+              <input type="text" placeholder="Ej: 150101" maxlength="6"/>
+            </div>
+            <div class="ruta-field">
+              <label>Dirección</label>
+              <input type="text" placeholder="Av. Javier Prado Este 123, San Isidro"/>
+            </div>
+          </div>
+          <div class="ruta-arrow">→</div>
+          <div class="ruta-box llegada">
+            <div class="ruta-label">Punto de llegada</div>
+            <div class="ruta-field">
+              <label>Ubigeo (6 dígitos)</label>
+              <input type="text" placeholder="Ej: 070101" maxlength="6"/>
+            </div>
+            <div class="ruta-field">
+              <label>Dirección</label>
+              <input type="text" placeholder="Av. Argentina 456, Callao"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">Vehículo y conductor</div>
+        <div class="form-grid-3">
+          <div class="field">
+            <label>Placa del vehículo</label>
+            <input type="text" placeholder="Ej: ABC-123"/>
+          </div>
+          <div class="field">
+            <label>N° de licencia</label>
+            <input type="text" placeholder="Ej: Q12345678"/>
+          </div>
+          <div class="field">
+            <label>DNI del conductor</label>
+            <input type="text" placeholder="Ej: 12345678" maxlength="8"/>
+          </div>
+          <div class="field">
+            <label>Nombres del conductor</label>
+            <input type="text" placeholder="Nombres"/>
+          </div>
+          <div class="field">
+            <label>Apellidos del conductor</label>
+            <input type="text" placeholder="Apellidos"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-transportista" style="display:none">
+        <div class="card-titulo">
+          Transportista
+          <span class="tag">Requerido en transporte público</span>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>RUC del transportista</label>
+            <input type="text" placeholder="RUC registrado en MTC"/>
+          </div>
+          <div class="field">
+            <label>Razón social</label>
+            <input type="text" placeholder="Nombre del transportista"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">Bienes transportados</div>
+        <div class="items-header">
+          <span>Descripción del bien</span>
+          <span>Cantidad</span>
+          <span>Unidad</span>
+          <span>Código interno</span>
+          <span></span>
+        </div>
+        <div id="items">
+          <div class="item-row">
+            <input type="text" value="Computadora Laptop Core i7 16GB RAM 512GB SSD"/>
+            <input type="number" value="5" min="1"/>
+            <input type="text" value="NIU" style="max-width:80px"/>
+            <input type="text" value="PROD-001"/>
+            <button class="del-btn" onclick="eliminarItem(this)">×</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="agregarItem()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>
+          Agregar bien
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">Documento relacionado <span class="tag">opcional</span></div>
+        <div class="form-grid-3">
+          <div class="field">
+            <label>Tipo</label>
+            <select>
+              <option value="">— Sin documento relacionado —</option>
+              <option value="01">01 — Factura</option>
+              <option value="03">03 — Boleta</option>
+              <option value="09">09 — Guía de remisión</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Serie</label>
+            <input type="text" placeholder="Ej: F001"/>
+          </div>
+          <div class="field">
+            <label>Número</label>
+            <input type="text" placeholder="Ej: 00000123"/>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-bar">
+      <div class="bottom-info">Guía T001-00000048 · Se enviará automáticamente a SUNAT al emitir</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost">Vista previa PDF</button>
+        <button class="btn btn-primary" onclick="emitir()">Emitir a SUNAT →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTransportista() {
+  var modal = document.getElementById('modalidad').value;
+  document.getElementById('card-transportista').style.display =
+    modal === '01' ? 'block' : 'none';
+}
+function agregarItem() {
+  var div = document.createElement('div');
+  div.className = 'item-row';
+  div.innerHTML =
+    '<input type="text" placeholder="Descripción del bien"/>' +
+    '<input type="number" value="1" min="1"/>' +
+    '<input type="text" value="NIU"/>' +
+    '<input type="text" placeholder="Código interno"/>' +
+    '<button class="del-btn" onclick="eliminarItem(this)">×</button>';
+  document.getElementById('items').appendChild(div);
+}
+function eliminarItem(btn) {
+  var rows = document.querySelectorAll('.item-row');
+  if (rows.length <= 1) { alert('Debe haber al menos un bien.'); return; }
+  btn.closest('.item-row').remove();
+}
+function emitir() {
+  alert('Guía T001-00000048 enviada a SUNAT exitosamente.\nEstado: ACEPTADO\nCódigo: 0');
+}
+</script>
+  <script>
+    (function() {
+      var page = location.pathname.split('/').pop() || 'dashboard.html';
+      document.querySelectorAll('.sidebar-item').forEach(function(a) {
+        if (a.getAttribute('href') === page) a.classList.add('active');
+      });
+    })();
+  </script>
+</body>
+</html>

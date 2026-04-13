@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotizaciones — Facturafy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --azul: #185FA5; --azul-dark: #0C447C; --azul-light: #E6F1FB;
+  --verde: #1a7a3a; --verde-light: #EAF3DE;
+  --rojo: #A32D2D; --rojo-light: #FCEBEB;
+  --amarillo: #854F0B; --amarillo-light: #FAEEDA;
+  --morado: #534AB7; --morado-light: #EEEDFE;
+  --gris-bg: #F4F4F1; --gris-borde: #E0DDD8;
+  --gris-texto: #5a5a6a; --texto: #1a1a2e; --blanco: #ffffff;
+  --sidebar-w: 210px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--gris-bg); color: var(--texto); font-size: 13px; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { background: var(--blanco); border-right: 1px solid var(--gris-borde); display: flex; flex-direction: column; padding: 16px 0; width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; }
+.sidebar-brand { padding: 4px 16px 20px; }
+.sidebar-brand .nombre { font-size: 16px; font-weight: 500; }
+.sidebar-brand .ruc { font-size: 11px; color: var(--gris-texto); margin-top: 2px; }
+.sidebar-section { font-size: 10px; color: var(--gris-texto); padding: 0 16px; margin: 10px 0 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gris-texto); cursor: pointer; text-decoration: none; transition: background 0.15s; font-size: 13px; }
+.sidebar-item:hover { background: var(--gris-bg); color: var(--texto); }
+.sidebar-item.active { background: var(--azul-light); color: var(--azul); font-weight: 500; }
+.sidebar-item .badge { margin-left: auto; background: var(--rojo-light); color: var(--rojo); font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--gris-borde); }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--azul-light); color: var(--azul); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { background: var(--blanco); border-bottom: 1px solid var(--gris-borde); padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-titulo { font-size: 15px; font-weight: 500; }
+.content { padding: 24px; flex: 1; padding-bottom: 20px; }
+.btn { padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; transition: all 0.15s; }
+.btn-primary { background: var(--azul); color: white; }
+.btn-primary:hover { background: var(--azul-dark); }
+.btn-ghost { background: none; border: 1px solid var(--gris-borde); color: var(--gris-texto); }
+.btn-ghost:hover { background: var(--gris-bg); }
+.btn-verde { background: var(--verde); color: white; }
+.btn-verde:hover { background: #27500A; }
+.pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+.pill-pendiente { background: var(--amarillo-light); color: var(--amarillo); }
+.pill-aceptada { background: var(--verde-light); color: var(--verde); }
+.pill-rechazada { background: var(--rojo-light); color: var(--rojo); }
+.pill-vencida { background: var(--gris-bg); color: var(--gris-texto); border: 1px solid var(--gris-borde); }
+.pill-facturada { background: var(--morado-light); color: var(--morado); }
+.filtros { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+.search-wrap { position: relative; flex: 1; max-width: 320px; }
+.search-wrap input { width: 100%; padding: 8px 10px 8px 32px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); }
+.search-wrap input:focus { outline: none; border-color: var(--azul); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gris-texto); pointer-events: none; }
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 10px; padding: 14px; }
+.stat-val { font-size: 24px; font-weight: 500; }
+.stat-lbl { font-size: 11px; color: var(--gris-texto); margin-top: 3px; }
+.tabla-wrap { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th { font-size: 11px; font-weight: 500; color: var(--gris-texto); text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--gris-borde); background: var(--gris-bg); }
+td { font-size: 12px; padding: 11px 16px; border-bottom: 1px solid var(--gris-borde); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gris-bg); }
+.accion { font-size: 11px; color: var(--azul); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; margin-right: 6px; }
+.accion:hover { text-decoration: underline; }
+.accion.verde { color: var(--verde); }
+.accion.danger { color: var(--rojo); margin-right: 0; }
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 24px; }
+.modal-box { background: var(--blanco); border-radius: 14px; width: 100%; max-width: 680px; overflow: hidden; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--gris-borde); display: flex; justify-content: space-between; align-items: center; }
+.modal-titulo { font-size: 14px; font-weight: 500; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gris-texto); }
+.modal-body { padding: 20px; max-height: 72vh; overflow-y: auto; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--gris-borde); display: flex; justify-content: flex-end; gap: 8px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 500; color: var(--gris-texto); }
+.field input, .field select, .field textarea { padding: 8px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(24,95,165,0.1); }
+.field .hint { font-size: 10px; color: var(--gris-texto); }
+.sec-titulo { font-size: 11px; font-weight: 500; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gris-borde); grid-column: 1 / -1; }
+.items-header { display: grid; grid-template-columns: 2fr 70px 90px 90px 36px; gap: 8px; padding: 0 0 8px; border-bottom: 1px solid var(--gris-borde); margin-bottom: 10px; }
+.items-header span { font-size: 10px; font-weight: 500; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.05em; }
+.item-row { display: grid; grid-template-columns: 2fr 70px 90px 90px 36px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.item-row input { padding: 7px 8px; border: 1px solid var(--gris-borde); border-radius: 8px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--blanco); width: 100%; }
+.item-row input.readonly { background: var(--gris-bg); color: var(--gris-texto); }
+.del-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--gris-borde); background: none; color: var(--gris-texto); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.del-btn:hover { background: var(--rojo-light); color: var(--rojo); border-color: transparent; }
+.add-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--azul); background: none; border: none; cursor: pointer; padding: 6px 0; font-family: 'DM Sans', sans-serif; margin-top: 4px; }
+.totales { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding-top: 12px; border-top: 1px solid var(--gris-borde); margin-top: 8px; }
+.total-row { display: flex; gap: 40px; font-size: 12px; }
+.total-label { color: var(--gris-texto); min-width: 100px; text-align: right; }
+.total-val { min-width: 90px; text-align: right; font-family: monospace; }
+.total-row.grande .total-label { font-size: 14px; font-weight: 500; color: var(--texto); }
+.total-row.grande .total-val { font-size: 18px; font-weight: 500; color: var(--azul); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="nombre">Facturafy</div>
+      <div class="ruc">RUC 20100070970</div>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <a href="dashboard.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section">Ventas</div>
+    <a href="cotizaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="9" y2="8"/><line x1="5" y1="11" x2="7" y2="11"/></svg>
+      Cotizaciones
+    </a>
+    <a href="factura.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+      Facturas
+    </a>
+    <a href="boleta.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/></svg>
+      Boletas
+    </a>
+    <a href="notas-salidas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M9 8H5M11 11H5"/><path d="M9 1v4h4"/></svg>
+      Notas de salida
+    </a>
+
+    <div class="sidebar-section">Comprobantes</div>
+    <a href="guia.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="10" rx="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
+      Guías de remisión
+      <span class="badge">3</span>
+    </a>
+    <a href="importar-gre.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v9M4 6l4 4 4-4"/><rect x="2" y="11" width="12" height="4" rx="1"/></svg>
+      Importar TXT GRE
+    </a>
+    <a href="notas.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="8" y1="3" x2="8" y2="9"/></svg>
+      Notas crédito/débito
+    </a>
+    <a href="anulaciones.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="5" y1="5" x2="11" y2="11"/><line x1="11" y1="5" x2="5" y2="11"/></svg>
+      Anulaciones
+    </a>
+    <a href="resumenes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="4" y1="10" x2="9" y2="10"/></svg>
+      Resúmenes diarios
+    </a>
+
+    <div class="sidebar-section">Inventario</div>
+    <a href="productos.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Productos
+    </a>
+    <a href="compras.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h2l2 8h8l1-5H4"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
+      Compras
+    </a>
+
+    <div class="sidebar-section">Empresa</div>
+    <a href="clientes.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 14v-1a3 3 0 00-6 0v1"/><circle cx="8" cy="7" r="3"/></svg>
+      Clientes y proveedores
+    </a>
+    <a href="locales.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l6 5v9H2V6z"/><rect x="5" y="9" width="3" height="5"/><rect x="8" y="9" width="3" height="5"/></svg>
+      Locales y series
+    </a>
+    <a href="historial.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+      Historial
+    </a>
+
+    <div class="sidebar-section">Cuenta</div>
+    <a href="config.html" class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+      Configuración
+    </a>
+
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar">EA</div>
+        <div>
+          <div style="font-size:12px;font-weight:500">Empresa Demo SAC</div>
+          <div style="font-size:10px;color:var(--gris-texto)">Plan Profesional</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-titulo">Cotizaciones</div>
+      <button class="btn btn-primary" onclick="abrirModal()">+ Nueva cotización</button>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val">12</div>
+          <div class="stat-lbl">Total este mes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--amarillo)">5</div>
+          <div class="stat-lbl">Pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--verde)">4</div>
+          <div class="stat-lbl">Aceptadas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--morado)">3</div>
+          <div class="stat-lbl">Convertidas a factura</div>
+        </div>
+      </div>
+
+      <div class="filtros">
+        <div class="search-wrap">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><line x1="10" y1="10" x2="13" y2="13"/></svg>
+          <input type="text" placeholder="Buscar por número o cliente..." oninput="buscar(this.value)"/>
+        </div>
+        <select style="padding:8px 10px;border:1px solid var(--gris-borde);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--texto);background:var(--blanco)">
+          <option>Todos los estados</option>
+          <option>Pendiente</option>
+          <option>Aceptada</option>
+          <option>Rechazada</option>
+          <option>Facturada</option>
+          <option>Vencida</option>
+        </select>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px">N° Cotización</th>
+              <th>Cliente</th>
+              <th style="width:90px">Fecha</th>
+              <th style="width:90px">Vence</th>
+              <th style="width:100px">Total</th>
+              <th style="width:90px">Estado</th>
+              <th style="width:150px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <tr>
+              <td style="font-family:monospace;font-size:11px">COT-000012</td>
+              <td style="font-weight:500">Distribuidora Norte SAC</td>
+              <td style="color:var(--gris-texto)">20/03/2026</td>
+              <td style="color:var(--gris-texto)">27/03/2026</td>
+              <td style="font-weight:500">S/ 15,399.00</td>
+              <td><span class="pill pill-pendiente">Pendiente</span></td>
+              <td>
+                <button class="accion" onclick="verCotizacion()">Ver</button>
+                <button class="accion verde" onclick="convertir(this)">Facturar</button>
+                <button class="accion danger" onclick="eliminar(this)">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:11px">COT-000011</td>
+              <td style="font-weight:500">Ferretería Central EIRL</td>
+              <td style="color:var(--gris-texto)">18/03/2026</td>
+              <td style="color:var(--gris-texto)">25/03/2026</td>
+              <td style="font-weight:500">S/ 3,240.00</td>
+              <td><span class="pill pill-aceptada">Aceptada</span></td>
+              <td>
+                <button class="accion" onclick="verCotizacion()">Ver</button>
+                <button class="accion verde" onclick="convertir(this)">Facturar</button>
+                <button class="accion danger" onclick="eliminar(this)">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:11px">COT-000010</td>
+              <td style="font-weight:500">Tech Supplies Peru SAC</td>
+              <td style="color:var(--gris-texto)">15/03/2026</td>
+              <td style="color:var(--gris-texto)">22/03/2026</td>
+              <td style="font-weight:500">S/ 8,750.00</td>
+              <td><span class="pill pill-facturada">Facturada</span></td>
+              <td>
+                <button class="accion" onclick="verCotizacion()">Ver</button>
+                <button class="accion" onclick="alert('Ver factura F001-00000087')">Ver factura</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:11px">COT-000009</td>
+              <td style="font-weight:500">Juan Carlos Pérez</td>
+              <td style="color:var(--gris-texto)">10/03/2026</td>
+              <td style="color:var(--gris-texto)">17/03/2026</td>
+              <td style="font-weight:500">S/ 590.00</td>
+              <td><span class="pill pill-vencida">Vencida</span></td>
+              <td>
+                <button class="accion" onclick="verCotizacion()">Ver</button>
+                <button class="accion" onclick="alert('Renovando cotización...')">Renovar</button>
+                <button class="accion danger" onclick="eliminar(this)">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:11px">COT-000008</td>
+              <td style="font-weight:500">Logística Express EIRL</td>
+              <td style="color:var(--gris-texto)">08/03/2026</td>
+              <td style="color:var(--gris-texto)">15/03/2026</td>
+              <td style="font-weight:500">S/ 2,100.00</td>
+              <td><span class="pill pill-rechazada">Rechazada</span></td>
+              <td>
+                <button class="accion" onclick="verCotizacion()">Ver</button>
+                <button class="accion danger" onclick="eliminar(this)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA COTIZACIÓN -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-titulo">Nueva cotización</div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="sec-titulo">Datos del cliente</div>
+        <div class="field">
+          <label>Tipo de documento</label>
+          <select><option>6 — RUC</option><option>1 — DNI</option></select>
+        </div>
+        <div class="field">
+          <label>Número de documento</label>
+          <input type="text" placeholder="Ej: 20131312955"/>
+        </div>
+        <div class="field full">
+          <label>Razón social / Nombre</label>
+          <input type="text" placeholder="Se autocompleta con el RUC"/>
+        </div>
+        <div class="field">
+          <label>Fecha de emisión</label>
+          <input type="date" value="2026-03-20"/>
+        </div>
+        <div class="field">
+          <label>Fecha de vencimiento</label>
+          <input type="date" value="2026-03-27"/>
+        </div>
+        <div class="field">
+          <label>Moneda</label>
+          <select><option>PEN — Soles</option><option>USD — Dólares</option></select>
+        </div>
+        <div class="field">
+          <label>Condición de pago</label>
+          <select><option>Contado</option><option>Crédito 15 días</option><option>Crédito 30 días</option></select>
+        </div>
+
+        <div class="sec-titulo">Productos y servicios</div>
+      </div>
+
+      <div class="items-header">
+        <span>Descripción</span>
+        <span>Cantidad</span>
+        <span>Precio unit.</span>
+        <span>Subtotal</span>
+        <span></span>
+      </div>
+      <div id="items">
+        <div class="item-row">
+          <input type="text" placeholder="Producto o servicio"/>
+          <input type="number" value="1" min="1" oninput="calcular()"/>
+          <input type="number" value="0.00" step="0.01" oninput="calcular()"/>
+          <input class="readonly" readonly value="S/ 0.00"/>
+          <button class="del-btn" onclick="eliminarItem(this)">×</button>
+        </div>
+      </div>
+      <button class="add-btn" onclick="agregarItem()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>
+        Agregar ítem
+      </button>
+      <div class="totales">
+        <div class="total-row">
+          <span class="total-label">Subtotal sin IGV</span>
+          <span class="total-val" id="t-base">S/ 0.00</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">IGV 18%</span>
+          <span class="total-val" id="t-igv">S/ 0.00</span>
+        </div>
+        <div class="total-row grande">
+          <span class="total-label">Total</span>
+          <span class="total-val" id="t-total">S/ 0.00</span>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:16px">
+        <div class="field full">
+          <label>Observaciones / Condiciones</label>
+          <textarea rows="2" placeholder="Validez de la cotización, condiciones de entrega, garantía..." style="resize:none"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-ghost" onclick="alert('Cotización guardada como borrador.')">Guardar borrador</button>
+      <button class="btn btn-primary" onclick="guardar()">Enviar cotización</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModal() {
+  document.getElementById('modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+function fmt(n) {
+  return 'S/ ' + n.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function calcular() {
+  var rows = document.querySelectorAll('.item-row');
+  var totalBase = 0;
+  rows.forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    var qty    = parseFloat(inputs[1].value) || 0;
+    var precio = parseFloat(inputs[2].value) || 0;
+    var total  = qty * precio;
+    var base   = total / 1.18;
+    totalBase += base;
+    inputs[3].value = fmt(total);
+  });
+  var igv   = totalBase * 0.18;
+  var total = totalBase + igv;
+  document.getElementById('t-base').textContent  = fmt(totalBase);
+  document.getElementById('t-igv').textContent   = fmt(igv);
+  document.getElementById('t-total').textContent = fmt(total);
+}
+function agregarItem() {
+  var div = document.createElement('div');
+  div.className = 'item-row';
+  div.innerHTML =
+    '<input type="text" placeholder="Producto o servicio"/>' +
+    '<input type="number" value="1" min="1" oninput="calcular()"/>' +
+    '<input type="number" value="0.00" step="0.01" oninput="calcular()"/>' +
+    '<input class="readonly" readonly value="S/ 0.00"/>' +
+    '<button class="del-btn" onclick="eliminarItem(this)">×</button>';
+  document.getElementById('items').appendChild(div);
+}
+function eliminarItem(btn) {
+  var rows = document.querySelectorAll('.item-row');
+  if (rows.length <= 1) { alert('Debe haber al menos un ítem.'); return; }
+  btn.closest('.item-row').remove();
+  calcular();
+}
+function guardar() {
+  alert('Cotización COT-000013 enviada al cliente exitosamente.');
+  cerrarModal();
+}
+function convertir(btn) {
+  if (confirm('¿Convertir esta cotización en factura?')) {
+    var pill = btn.closest('tr').querySelector('.pill');
+    pill.className = 'pill pill-facturada';
+    pill.textContent = 'Facturada';
+    btn.remove();
+    alert('Cotización convertida. Redirigiendo a nueva factura...\n\nEn la versión real abre el formulario de factura con los datos prellenados.');
+  }
+}
+function eliminar(btn) {
+  if (confirm('¿Eliminar esta cotización?')) btn.closest('tr').remove();
+}
+function buscar(val) {
+  val = val.toLowerCase();
+  document.querySelectorAll('#tabla-body tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
+}
+function verCotizacion() {
+  alert('En la versión real abre el PDF de la cotización para imprimir o enviar por email.');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') cerrarModal();
+});
+</script>
+  <script>
+    (function() {
+      var page = location.pathname.split('/').pop() || 'dashboard.html';
+      document.querySelectorAll('.sidebar-item').forEach(function(a) {
+        if (a.getAttribute('href') === page) a.classList.add('active');
+      });
+    })();
+  </script>
+</body>
+</html>
